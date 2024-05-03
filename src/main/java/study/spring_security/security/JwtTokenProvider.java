@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
+@Service    // 어노테이션 등록
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 	private final Environment env;
@@ -39,7 +39,7 @@ public class JwtTokenProvider {
 	}
 
 	private Key getSigningKey() {
-		byte[] keyBytes = Decoders.BASE64.decode(env.getProperty("JWT.SECRET"));
+		byte[] keyBytes = Decoders.BASE64.decode(env.getProperty("JWT.SECRET_KEY"));
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
 
