@@ -11,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +26,15 @@ public class Member implements UserDetails {
 	private String loginId;
 	private String uuid;
 	private String password;
+
+	@Builder
+	public Member(Long id, String name, String loginId, String uuid, String password) {
+		this.id = id;
+		this.name = name;
+		this.loginId = loginId;
+		this.uuid = uuid;
+		this.password = password;
+	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
