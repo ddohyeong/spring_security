@@ -15,7 +15,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 	private final Environment env;
@@ -56,6 +58,20 @@ public class JwtTokenProvider {
 		return extractClaim(token, Claims::getExpiration);
 	}
 
+	// 토큰의 UUID 를 get, 그리고 토큰에 정보가 있는지 체크
+	public String validateAndGetUserUuid(String token) {
+		try {
+			return extractClaim(token, Claims::getSubject);
+		} catch (NullPointerException e) {
+			log.info("토큰에 담긴 정보가 없음");
+			return null;
+		}
+	}
+
+	// 토큰에서 UUID 추출
+	public String getUuid(String token) {
+		return extractClaim(token, Claims::getSubject);
+	}
 }
 
 
