@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 	private final Environment env;
@@ -30,6 +32,10 @@ public class JwtTokenProvider {
 				.setExpiration(new java.util.Date(System.currentTimeMillis() + env.getProperty("JWT.EXPIRATION_TIME", Long.class)))
 				.signWith(getSigningKey(), SignatureAlgorithm.HS256)
 				.compact();
+	}
+
+	public String generateToken(UserDetails userDetails) {
+		return generateToken(Map.of(), userDetails);
 	}
 
 	private Key getSigningKey() {
