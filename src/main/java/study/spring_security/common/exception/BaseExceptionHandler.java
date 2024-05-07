@@ -1,14 +1,20 @@
 package study.spring_security.common.exception;
 
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import study.spring_security.common.response.BaseResponse;
 import study.spring_security.common.response.BaseResponseStatus;
 
+@RestControllerAdvice
 public class BaseExceptionHandler {
 
      /*
@@ -44,4 +50,21 @@ public class BaseExceptionHandler {
         return new ResponseEntity<>(response, response.httpStatus());
     }
 
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<?> SignatureError(SignatureException e){
+        BaseResponse response = new BaseResponse(BaseResponseStatus.INVALID_JWT_SIGNATURE);
+        return new ResponseEntity<>(response, response.httpStatus());
+    }
+
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<?> MalformedJwtError(MalformedJwtException e){
+        BaseResponse response = new BaseResponse(BaseResponseStatus.INVALID_JWT_MALFORMED_EXCEPTION);
+        return new ResponseEntity<>(response, response.httpStatus());
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<?> ExpiredJwtError(ExpiredJwtException e){
+        BaseResponse response = new BaseResponse(BaseResponseStatus.INVALID_JWT_EXPIRED);
+        return new ResponseEntity<>(response, response.httpStatus());
+    }
 }

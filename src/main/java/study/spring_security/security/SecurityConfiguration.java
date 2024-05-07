@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfiguration {
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final AuthenticationProvider authenticationProvider;
+	private final AuthenticationEntryPoint entryPoint;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -26,7 +28,7 @@ public class SecurityConfiguration {
 				.authorizeHttpRequests( // Http 요청에 대한 접근을 제한
 						authorizeHttpRequests -> authorizeHttpRequests
 								// 해당 패턴은 URL 인증없이 접근을 허용
-								.requestMatchers("/**").permitAll()
+								.requestMatchers("/auth/**").permitAll()
 								// 다른 모든 요청은 인증을 요구
 								.anyRequest().authenticated()
 				)
@@ -40,7 +42,8 @@ public class SecurityConfiguration {
 				// 사용자의 인증 로직을 커스터마이징
 				.authenticationProvider(authenticationProvider)
 				// UsernamePasswordAuthenticationOnFilter 전에 처리함 -> JWT 토큰을 검증
-				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+				.exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint));
 
 		return httpSecurity.build();
 	}

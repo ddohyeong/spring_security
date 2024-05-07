@@ -30,30 +30,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			HttpServletResponse response,
 			FilterChain filterChain
 	) throws ServletException, IOException {
-		final String authHeader = request.getHeader("Authorization");
-		final String jwt;
-		final String userUuid;
 
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-			log.info("로그인이 되어있지 않음");
-			filterChain.doFilter(request, response);
-			return;
+		try{
+			final String authHeader = request.getHeader("Authorization");
+			final String jwt;
+			final String userUuid;
+
+			if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+				log.info("로그인이 되어있지 않음");
+				filterChain.doFilter(request, response);
+				return;
+			}
+
+			jwt = authHeader.substring(7);
+			userUuid = jwtTokenProvider.getUuid(jwt);
+
+			// SecurityContextHolder를 사용하여 현재 보안 컨텍스트에 인증 정보가 없는 경우 사용자의 인증 정보를 생성하고 설정
+			if (SecurityContextHolder.getContext().getAuthentication() == null) {
+				UserDetails userDetails = this.userDetailsService.loadUserByUsername(userUuid);
+				UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+						userDetails, null, userDetails.getAuthorities());
+
+				authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+				// filterChain.doFilter(request, response);
+			}
+		}catch(Exception e){
+			log.error("{}", e.getMessage());
+			request.setAttribute("exception", e);
 		}
-
-		jwt = authHeader.substring(7);
-		userUuid = jwtTokenProvider.getUuid(jwt);
-
-		// SecurityContextHolder를 사용하여 현재 보안 컨텍스트에 인증 정보가 없는 경우 사용자의 인증 정보를 생성하고 설정
-		if (SecurityContextHolder.getContext().getAuthentication() == null) {
-			UserDetails userDetails = this.userDetailsService.loadUserByUsername(userUuid);
-			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-					userDetails, null, userDetails.getAuthorities());
-
-			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-			SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-			filterChain.doFilter(request, response);
-		}
+		filterChain.doFilter(request, response);
 	}
 
 }

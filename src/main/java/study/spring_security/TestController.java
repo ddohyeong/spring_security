@@ -16,7 +16,6 @@ public class TestController {
 	@GetMapping
 	public BaseResponse<Void> test(@RequestHeader("Authorization") String token,
 			@RequestParam("test") String test) {
-		System.out.println(token);
 		if (test.equals("error")) {
 			throw new BaseException(BaseResponseStatus.WRONG_JWT_TOKEN);
 		}
